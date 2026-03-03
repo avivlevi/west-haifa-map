@@ -1,11 +1,14 @@
-import { Phone, MapPin, Users } from 'lucide-react'
+import type React from 'react'
+import { Navigation2 } from 'lucide-react'
 import type { LocationWithDistance } from '../hooks/useNearbyLocations'
-import { CATEGORY_LABELS, CATEGORY_COLORS } from '../data/locations'
+import { CATEGORY_COLORS, CATEGORY_LABELS, CATEGORY_ICONS } from '../data/locations'
 
 interface Props {
   location: LocationWithDistance
   onClick: () => void
   selected: boolean
+  className?: string
+  style?: React.CSSProperties
 }
 
 function formatDistance(m: number): string {
@@ -13,74 +16,64 @@ function formatDistance(m: number): string {
   return `${(m / 1000).toFixed(1)} ק"מ`
 }
 
-export const LocationCard = ({ location, onClick, selected }: Props) => {
+function mapsUrl(lat: number, lng: number) {
+  return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+}
+
+export const LocationCard = ({ location, onClick, selected, className = '', style: extraStyle }: Props) => {
   const color = CATEGORY_COLORS[location.category]
+  const Icon  = CATEGORY_ICONS[location.category]
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className="w-full text-right p-3 rounded-xl border transition-all hover:shadow-md active:scale-95"
+      onKeyDown={e => e.key === 'Enter' && onClick()}
+      className={`w-full text-right px-2.5 py-2 rounded-lg border transition-all active:scale-95 cursor-pointer ${className}`}
       style={{
-        backgroundColor: selected ? `${color}15` : 'white',
-        borderColor: selected ? color : '#e2e8f0',
+        backgroundColor: selected ? `${color}12` : 'white',
+        borderColor: selected ? color : '#f1f5f9',
         direction: 'rtl',
+        ...extraStyle,
       }}
     >
-      <div className="flex items-start gap-3">
-        {/* Color dot */}
-        <div
-          className="mt-1 w-3 h-3 rounded-full shrink-0"
-          style={{ backgroundColor: color }}
-        />
-        <div className="flex-1 min-w-0">
-          {/* Name + distance */}
-          <div className="flex items-center justify-between gap-2">
-            <span className="font-semibold text-sm text-gray-900 truncate">{location.name}</span>
-            <span
-              className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-full"
-              style={{ backgroundColor: `${color}20`, color }}
-            >
-              {formatDistance(location.distanceM)}
-            </span>
-          </div>
-
-          {/* Category */}
-          <p className="text-xs text-gray-500 mt-0.5">{CATEGORY_LABELS[location.category]}</p>
-
-          {/* Address */}
-          <div className="flex items-center gap-1 mt-1">
-            <MapPin className="h-3 w-3 text-gray-400 shrink-0" />
-            <span className="text-xs text-gray-600 truncate">{location.address}</span>
-          </div>
-
-          {/* Capacity */}
-          {location.capacity && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <Users className="h-3 w-3 text-gray-400 shrink-0" />
-              <span className="text-xs text-gray-600">קיבולת: {location.capacity}</span>
-            </div>
-          )}
-
-          {/* Phone */}
-          {location.phone && (
-            <a
-              href={`tel:${location.phone.replace(/-/g, '')}`}
-              onClick={e => e.stopPropagation()}
-              className="flex items-center gap-1 mt-0.5 w-fit"
-            >
-              <Phone className="h-3 w-3 shrink-0" style={{ color }} />
-              <span className="text-xs font-medium" style={{ color }}>
-                {location.phone}
-              </span>
-            </a>
-          )}
-
-          {/* Notes */}
-          {location.notes && (
-            <p className="text-xs text-gray-400 mt-0.5 italic">{location.notes}</p>
-          )}
-        </div>
+      {/* Row 1: icon + name + distance + navigate */}
+      <div className="flex items-center gap-2">
+        <Icon className="h-3 w-3 shrink-0" style={{ color }} />
+        <span className="font-semibold text-xs text-gray-900 truncate flex-1 leading-tight">
+          {location.name}
+        </span>
+        <span
+          className="shrink-0 text-[10px] font-medium px-1.5 py-px rounded-full leading-tight"
+          style={{ backgroundColor: `${color}12`, color, border: `1px solid ${color}30` }}
+        >
+          {formatDistance(location.distanceM)}
+        </span>
+        <a
+          href={mapsUrl(location.lat, location.lng)}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={e => e.stopPropagation()}
+          className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90"
+          style={{ backgroundColor: `${color}15`, color }}
+          title="נווט בגוגל מפות"
+        >
+          <Navigation2 className="h-3 w-3" />
+        </a>
       </div>
-    </button>
+
+      {/* Row 2: category chip + address */}
+      <div className="flex items-center gap-1.5 mt-0.5 ps-4 min-w-0">
+        <span
+          className="shrink-0 flex items-center gap-0.5 text-[9px] font-medium px-1.5 py-px rounded-full leading-tight"
+          style={{ backgroundColor: `${color}12`, color, border: `1px solid ${color}30` }}
+        >
+          <Icon className="h-2 w-2" />
+          {CATEGORY_LABELS[location.category]}
+        </span>
+        <span className="text-[10px] text-gray-400 truncate leading-tight">{location.address}</span>
+      </div>
+    </div>
   )
 }

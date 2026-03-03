@@ -2,3 +2,38 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes incident-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 0.4;  transform: scale(1.25); }
+}
+.incident-pulse-ring {
+  animation: incident-pulse 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.card-animate-in {
+  animation: card-in 220ms ease-out both;
+  animation-delay: var(--card-delay, 0ms);
+}
+
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-6px) scaleY(0.95); }
+  to   { opacity: 1; transform: translateY(0)  scaleY(1); }
+}
+.dropdown-animate-in {
+  animation: dropdown-in 150ms ease-out both;
+  transform-origin: top center;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in-delayed {
+  animation: fade-in 300ms ease-out 150ms both;
+}
